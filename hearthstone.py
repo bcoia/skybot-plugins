@@ -1,76 +1,81 @@
 import re
 
-from util import hook, http
+from util import hook
+import json
 
 @hook.command('hs')
 @hook.command
 def hearthstone(inp):
     ".hs/.hearthstone -- searches the Hearthstone API for info on a card named <query>"
     
-    inp = inp.replace(" ", "%20")
-    request_url = 'http://hearthstoneapi.com/cards/name/%s' % inp
+    json_file = 'AllSets.json'
+    try:
+        json_f = open(json_file, "r")
+    except IOError, e:
+        return "error: can't load json file, did you download it from hearthstonejson.com?"
 
-    response = http.get_json(request_url)
-    result = response[0]
+    result = searchCard(json_f, inp)
+    
     if not result:
         return 'error: cannot find a card named %s' % inp
 
     name = result['name']
-    description = result['description']
     cost = result['cost']
-    qualities = {0: 'Common',
-                 1: 'Uncommon',
-                 3: 'Rare',
-                 4: 'Epic',
-                 5: 'Legendary'}
-    quality = qualities[result['quality']]
-    cardtypes = {4: 'minion',
-                 5: 'spell',
-                 7: 'weapon'}
-    cardtype = cardtypes[result['type']]
+    ctype = result['type']
     try:
-        classs = result['classs']        
+        rarity = result['rarity']
     except KeyError, e:
-        classs = 99
-    classtypes = {1: 'Warrior',
-                  2: 'Paladin',
-                  3: 'Hunter',
-                  4: 'Rogue',
-                  5: 'Priest',
-                  7: 'Shaman',
-                  8: 'Mage',
-                  9: 'Warlock',
-                 11: 'Druid',
-                 99: 'Neutral'}
-    classs = classtypes[classs]
-    cardsets = {2: 'Basic',
-            3: 'Expert',
-            4: 'Reward',
-            5: 'Missions',
-            11: 'Promotion'}
-    cardset = cardsets[result['set']]
+        rarity = "Rarityless"
+    try:
+        cclass = result['playerClass']
+    except KeyError, e:
+        cclass = "Neutral"
+    try:
+        text = result['text']
+        for bad in ["<b>", "</b>", "<i>", "</i>", "$"]:
+	    text = text.replace(bad, "")
+    except KeyError, e:
+        text = " "
+
+    cardset = result['set']
     
-    if cardtype == 'minion':
+    if ctype == 'Minion':
+        try:
+            race = result['race']
+        except KeyError, e:
+            race = "Minion"
         health = result['health']
         attack = result['attack']
-        try:
-            race = result['race']        
-        except KeyError, e:
-            race = 1
-        races = { 1: 'Minion',
-                 14: 'Murloc',
-                 15: 'Demon',
-                 20: 'Beast',
-                 21: 'Totem',
-                 23: 'Pirate',
-                 24: 'Dragon'}
-        race = races[race]
-        return '(%s) \x02%s\x02 | %s %s %s, %s set | %s/%s, %s' % (cost, name, quality, classs, race, cardset, attack, health, description)
-    elif cardtype == 'spell':
-        return '(%s) \x02%s\x02 | %s %s Spell, %s set | %s' % (cost, name, quality, classs, cardset, description)
-    elif cardtype == 'weapon':
+	if (text != " "): return '(%s) \x02%s\x02 | %s %s %s, %s set | %s/%s, %s' % (cost, name, rarity, cclass, race, cardset, attack, health, text)
+        else: return '(%s) \x02%s\x02 | %s %s %s, %s set | %s/%s' % (cost, name, rarity, cclass, race, cardset, attack, health)
+    elif ctype == 'Spell':
+        return '(%s) \x02%s\x02 | %s %s Spell, %s set | %s' % (cost, name, rarity, cclass, cardset, text)
+    elif ctype == 'Weapon':
         attack = result['attack']
         durability = result['durability']
-        return '(%s) \x02%s\x02 | %s %s Weapon, %s set | %s/%s, %s' % (cost, name, quality, classs, cardset, attack, durability, description)
+        if (text != " "): return '(%s) \x02%s\x02 | %s %s Weapon, %s set | %s/%s, %s' % (cost, name, rarity, cclass, cardset, attack, durability, text)
+        else: return '(%s) \x02%s\x02 | %s %s Weapon, %s set | %s/%s' % (cost, name, rarity, cclass, cardset, attack, durability)
     else:
-        return '(%s) \x02%s\x02 | %s' % (cost, name, description)
+        return '(%s) \x02%s\x02 | %s' % (cost, name, text)
+
+def searchCard(file, inp):
+    setList = ['Basic', 'Expert', 'Curse of Naxxramas', 'Goblins vs Gnomes', 'Promotion', 'Reward']
+    final_json = json.load(file)
+    card = None
+    bestMatchNum = 9999 #im lazy
+    bestMatchCard = None
+
+    for nextSet in setList:
+        cset = final_json[nextSet]
+        for item in cset:
+            if item["type"] == "Enhancement": continue
+	    tmp = item["name"].lower().find(inp.lower())
+            if tmp == 0:
+		item['set'] = nextSet #tacking set to card
+		return item
+            if tmp != -1 and tmp < bestMatchNum:
+		 bestMatchNum = tmp
+                 bestMatchCard = item
+                 bestMatchCard['set'] = nextSet
+    return bestMatchCard #will return none for no matches
+    
