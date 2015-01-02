@@ -1,12 +1,32 @@
-Skybot plugins for your [Skybot](http://github.com/rmmh/skybot)!
+Plugins for your [Skybot](http://github.com/rmmh/skybot)!
 
-Features:
-* twitch.py -- unfurls Twitch.TV URLs with title, game, status, etc. also adds .twitch command to search a username manually.
-* steam.py -- unfurls Steam URLs with game title and price.
-* giantbomb.py -- a collection of tools for searching the Giant Bomb wiki. Currently only adds .rd, to search for the release date of a game.
-* hearthstone.py -- queries hearthstone JSON database for a given card name and returns information.
+## twitch.py
+Unfurls Twitch URLs with title, game, status and viewers.
 
-Known issues:
-* steam.py - occasionally scrapes info from other games on the page
-* giantbomb.py - chooses closest match and does not let you choose a platform
-* hearthstone.py - requires "AllSets.json" file in bot's directory, get it from hearthstonejson.com.
+### Usage
+```
+<bcoia> twitch.tv/twitchplayspokemon
+<skybot> TwitchPlaysPokemon is LIVE playing Pokémon Battle Revolution | Twitch Plays Pokemon (Enter moves via chat!!!) | 557 viewers
+```
+
+Also adds `.twitch [username]` command to search a username manually. Output includes the channel's URL.
+```
+<bcoia> .twitch saltybet
+<skybot> SaltyBet is LIVE playing M.U.G.E.N | Salty's Dream Cast Casino! Place your bets at www.saltybet.com | 351 viewers | http://www.twitch.tv/saltybet
+```
+
+### Installation
+1. Place `twitch.py` in your Skybot's `/plugins/` directory. That's it!
+
+## hearthstone.py
+Queries local Hearthstone JSON database (provided by hearthstonejson.com) for a given card name and returns information. Returns closest match for partial names.
+
+### Usage
+```
+<bcoia> .hs argent
+<skybot> (6) Argent Commander | Rare Neutral Minion, Expert set | 4/2, Charge, Divine Shield
+```
+
+### Installation
+1. Place `AllSets.json` from hearthstonejson.com in your Skybot's root directory.
+2. Place `hearthstone.py` into your Skybot's `/plugins/` directory.
