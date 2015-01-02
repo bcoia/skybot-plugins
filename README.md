@@ -1,3 +1,5 @@
+# Skybot Plugins
+
 Plugins for your [Skybot](http://github.com/rmmh/skybot)!
 
 ## twitch.py
