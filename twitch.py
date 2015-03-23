@@ -61,6 +61,6 @@ def twitch(inp, url_pasted=None):
         else:
             return '\x02%s\x02 is \x02LIVE\x02%s | \x02%s\x02 | %s' % (name, game, title, viewers)
 
-@hook.regex(r'^(http://|https://|)twitch\.tv/([_0-9a-zA-Z]+)')
+@hook.regex(r'.*(?:http://|https://|[^\.\w]|^)twitch\.tv/([_0-9a-zA-Z]+)')
 def show_channel(match, url_pasted=None):
     return twitch(match.group(1), 'yes')
