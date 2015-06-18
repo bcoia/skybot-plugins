@@ -59,7 +59,7 @@ def hearthstone(inp):
         return '(%s) \x02%s\x02 | %s' % (cost, name, text)
 
 def searchCard(file, inp):
-    setList = ['Basic', 'Expert', 'Curse of Naxxramas', 'Goblins vs Gnomes', 'Promotion', 'Reward']
+    setList = ['Basic', 'Expert', 'Curse of Naxxramas', 'Goblins vs Gnomes', 'Tavern Brawl' 'Promotion', 'Reward']
     final_json = json.load(file)
     card = None
     bestMatchNum = 9999 #im lazy
